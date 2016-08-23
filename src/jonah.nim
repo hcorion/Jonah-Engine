@@ -7,20 +7,20 @@ import times, os
 #Add support for donuts (Used in momentForCircle)
 
 type
-  rbType {.pure.} = enum
+  rbType* {.pure.} = enum
     none, rectangle, circle
 
 type
-  SpriteType {.pure.} = enum
+  SpriteType* {.pure.} = enum
     rectangle, circle
 
 type
-  GameObject = tuple[sprite: SpriteType, rigidbody: rbType, texture: Texture, body: chipmunk.Body, shape: csfml.Shape, physicsShape: chipmunk.Shape]
+  GameObject* = tuple[sprite: SpriteType, rigidbody: rbType, texture: Texture, body: chipmunk.Body, shape: csfml.Shape, physicsShape: chipmunk.Shape]
 #    sprite: SpriteType
 #    rigidbody: rbType = rbType.none
 #    age: int
 
-proc initGameObject(sprite: SpriteType, rigidbody: rbType, texture: Texture = nil, space: Space, width: float, height: float, mass: float, position: Vect): GameObject =
+proc initGameObject*(sprite: SpriteType, rigidbody: rbType, texture: Texture = nil, space: Space, width: float, height: float, mass: float, position: Vect): GameObject =
   var newGameObject: GameObject
   newGameObject.sprite = sprite
   if rigidbody == rbType.none:
@@ -60,7 +60,7 @@ proc floor (vec: Vect): Vector2f =
   result.x = vec.x.floor
   result.y = vec.y.floor
 
-proc drawGameObject(win: RenderWindow, gameObject: GameObject){.discardable.} =
+proc drawGameObject*(win: RenderWindow, gameObject: GameObject){.discardable.} =
   if gameObject.sprite == SpriteType.circle:
     let circle = cast[csfml.CircleShape](gameObject.physicsShape.userData)
     circle.position = gameObject.body.position.floor()
@@ -69,26 +69,3 @@ proc drawGameObject(win: RenderWindow, gameObject: GameObject){.discardable.} =
     let rect = cast[csfml.Shape](gameObject.physicsShape.userData)
     rect.position = gameObject.body.position.floor()
     win.draw(rect)
-
-var space = newSpace()
-var gravity = v(0, 3.14f)
-space.gravity = gravity
-space.iterations = 10
-
-var window = newRenderWindow(
-  videoMode(640, 480), "TEST", WindowStyle.Default)
-#gameObject = (SpriteType.rectangle, rbType.none)
-#initGameObject(gameObject)
-window.frameRateLimit = 60
-window.verticalSyncEnabled = true
-var gameObject = initGameObject(SpriteType.rectangle, rbType.rectangle, newTexture("p1.png"), space, width = 200, height = 200, mass = 0.1f, position = v(50, 50))
-while window.open:
-  space.step(1/60)
-  var event: Event
-  while window.pollEvent(event):
-    if event.kind == EventType.Closed:
-      window.close()
-      break
-  window.clear(White)
-  window.drawGameObject(gameObject)
-  window.display
