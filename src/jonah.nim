@@ -20,6 +20,16 @@ type
 #    rigidbody: rbType = rbType.none
 #    age: int
 
+proc mapValue(curValue: float): float =
+  #This is used because Chipmunk2D uses rotation values from -1 to 1
+  # and csfml takes values from -90 to 90
+  # you'll want to input a GameObject.body.rotation and set that to a csfml shape
+  var
+    leftSpan = 2
+    rightSpan = 180
+  var valueScaled = (curValue + 1) / (float)leftSpan
+  return -(90.0f + (valueScaled * (float)rightSpan))
+
 proc initGameObject*(sprite: SpriteType, rigidbody: rbType, texture: Texture = nil, space: Space, width: float, height: float, mass: float, position: Vect): GameObject =
   var newGameObject: GameObject
   newGameObject.sprite = sprite
@@ -40,7 +50,13 @@ proc initGameObject*(sprite: SpriteType, rigidbody: rbType, texture: Texture = n
     newGameObject.body.position = position
     #Now for the creation of the physics shape!
     if rigidbody == rbType.circle:
-      newGameObject.physicsShape = space.addShape(newCircleShape(newGameObject.body, height/2, vzero))
+      let radius = height/2
+      newGameObject.physicsShape = space.addShape(newCircleShape(newGameObject.body, radius, vzero))
+      newGameObject.physicsShape.userData = csfml.newCircleShape(radius)
+      #newGameObject.physicsShape.collisionType = cast[CollisionType](4)
+      let circleData = cast[csfml.CircleShape](newGameObject.physicsShape.userData)
+      circleData.setTexture(texture, toBoolInt(false))
+      circleData.origin = vec2(radius, radius)
     elif rigidbody == rbType.rectangle:
       newGameObject.physicsShape = space.addShape(newBoxShape(newGameObject.body, width, height, 4))
       var xy = Vector2f(x: width, y: height)
@@ -64,8 +80,11 @@ proc drawGameObject*(win: RenderWindow, gameObject: GameObject){.discardable.} =
   if gameObject.sprite == SpriteType.circle:
     let circle = cast[csfml.CircleShape](gameObject.physicsShape.userData)
     circle.position = gameObject.body.position.floor()
+    #circle.rotation = gameObject.body.rotation.x * 100
+    circle.rotation = mapValue(gameObject.body.rotation.x)
     win.draw(circle)
   elif gameObject.sprite == SpriteType.rectangle:
     let rect = cast[csfml.Shape](gameObject.physicsShape.userData)
     rect.position = gameObject.body.position.floor()
+    rect.rotation = mapValue(gameObject.body.rotation.x)
     win.draw(rect)
