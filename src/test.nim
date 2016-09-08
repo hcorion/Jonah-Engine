@@ -25,6 +25,7 @@ var discarded = space.addShape(ground)
 var tex = newTexture("p1.png")
 
 var player = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, tex, space, 20, 20, mass = 0.1f, position = v(110, 110))
+player.body.torque = -2000.0f
 goSeq.add(player)
 
 
@@ -50,8 +51,13 @@ while window.open:
     player.body.applyForceAtWorldPoint(v(-90, 0), player.body.position)
   if (keyboard_isKeyPressed(KeyCode.D)):
     player.body.applyForceAtWorldPoint(v(90, 0), player.body.position)
+  if (keyboard_isKeyPressed(KeyCode.F)):
+    quit()
   window.clear(White)
   for obj in goSeq:
     window.drawGameObject(obj)
   #window.drawGameObject(gameObject)
   window.display
+
+echo "max Value is: ", jonah.maxVal
+echo "min Value is : ", jonah.minVal

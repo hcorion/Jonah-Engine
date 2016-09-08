@@ -5,7 +5,8 @@ import times, os
 {.experimental.}
 #TODO:
 #Add support for donuts (Used in momentForCircle)
-
+var maxVal*: float
+var minVal*: float
 type
   rbType* {.pure.} = enum
     none, rectangle, circle
@@ -22,13 +23,22 @@ type
 
 proc mapValue(curValue: float): float =
   #This is used because Chipmunk2D uses rotation values from -1 to 1
-  # and csfml takes values from -90 to 90
+  # and sfml takes values from -90 to 90
   # you'll want to input a GameObject.body.rotation and set that to a csfml shape
+  var val = curValue + 1
+  #echo val
   var
     leftSpan = 2
     rightSpan = 180
-  var valueScaled = (curValue + 1) / (float)leftSpan
-  return -(90.0f + (valueScaled * (float)rightSpan))
+  #var valueScaled = (curValue+1 + 2) / (float)leftSpan
+  var valueScaled = val / 2
+  #echo "value scaled is ", valueScaled
+  #var newVal = (180.0f + (valueScaled * (float)rightSpan))
+  var newVal = (valueScaled * 360) - 180
+  echo "newVal is ", newVal, " and the chipmunk2d val is ", curValue, " and value Scaled is ", valueScaled
+  #return newVal - 180
+  return newVal
+
 
 proc initGameObject*(sprite: SpriteType, rigidbody: rbType, texture: Texture = nil, space: Space, width: float, height: float, mass: float, position: Vect): GameObject =
   var newGameObject: GameObject
@@ -85,6 +95,11 @@ proc drawGameObject*(win: RenderWindow, gameObject: GameObject){.discardable.} =
     win.draw(circle)
   elif gameObject.sprite == SpriteType.rectangle:
     let rect = cast[csfml.Shape](gameObject.physicsShape.userData)
+    if gameObject.body.rotation.x > maxVal:
+      maxVal = gameObject.body.rotation.x
+    elif gameObject.body.rotation.x < minVal:
+      minVal = gameObject.body.rotation.x
     rect.position = gameObject.body.position.floor()
     rect.rotation = mapValue(gameObject.body.rotation.x)
+    #rect.rotation = 270
     win.draw(rect)
