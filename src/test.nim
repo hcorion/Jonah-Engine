@@ -2,6 +2,7 @@ import jonah
 import chipmunk
 import csfml, csfml_graphics, csfml_system
 import strutils
+import math
 
 var
   gameHeight = 640.0
@@ -43,7 +44,7 @@ while window.open:
       window.close()
       break
     elif event.kind == csfml.EventType.MouseButtonReleased:
-      var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, newTexture("p1.png"), space, width = 30, height = 30, mass = 0.1f, position = v(110, 110))
+      var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.circle, newTexture("p1.png"), space, width = 30, height = 30, mass = 0.1f, position = v(110, 110))
       gameObject.body.position = v((float)mouse_getPosition(window).x, (float)mouse_getPosition(window).y)
       gameObject.physicsShape.friction= 20
       #gameObject.body.centerOfGravity = v(-15, -15)
@@ -64,7 +65,7 @@ while window.open:
   window.draw(rotation)
   #var newStr = ("x: ", cast[string](player.body.position.x), " y: ", cast[string](player.body.position.y))
   #echo player.body.position.x
-  rotation.str = formatFloat(player.body.rotation.x)
+  rotation.str = formatFloat(radToDeg(vtoangle(player.body.rotation)))
   rotation.position = vec2(player.body.position.x - 40, player.body.position.y - 40)
   #window.drawGameObject(gameObject)
   window.display
