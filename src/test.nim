@@ -1,6 +1,7 @@
 import jonah
 import chipmunk
 import csfml, csfml_graphics, csfml_system
+import strutils
 
 var
   gameHeight = 640.0
@@ -21,13 +22,17 @@ window.verticalSyncEnabled = true
 
 var ground = newSegmentShape(space.staticBody, v(-160, gameHeight - 160), v(gameWidth + 160, gameHeight - 160), 0)
 ground.friction = 20.0
-var discarded = space.addShape(ground)
+discard space.addShape(ground)
 var tex = newTexture("p1.png")
 
 var player = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, tex, space, 20, 20, mass = 0.1f, position = v(110, 110))
 player.body.torque = -2000.0f
 goSeq.add(player)
 
+var font = newFont("Hack-Regular.ttf")
+var rotation = newText("x: 0, y: 0", font, 20)
+rotation.position = vec2(170.0, 150.0)
+rotation.color = Black
 
 #Main loop
 while window.open:
@@ -56,6 +61,11 @@ while window.open:
   window.clear(White)
   for obj in goSeq:
     window.drawGameObject(obj)
+  window.draw(rotation)
+  #var newStr = ("x: ", cast[string](player.body.position.x), " y: ", cast[string](player.body.position.y))
+  #echo player.body.position.x
+  rotation.str = formatFloat(player.body.rotation.x)
+  rotation.position = vec2(player.body.position.x - 40, player.body.position.y - 40)
   #window.drawGameObject(gameObject)
   window.display
 
