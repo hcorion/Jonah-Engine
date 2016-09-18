@@ -25,8 +25,10 @@ var ground = newSegmentShape(space.staticBody, v(-160, gameHeight - 160), v(game
 ground.friction = 20.0
 discard space.addShape(ground)
 var tex = newTexture("p1.png")
+var intRect = IntRect(left: 0, top: 0, width: 389, height: 495)
+var sprite = newSprite(tex, intRect)
 
-var player = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, tex, space, 20, 20, mass = 0.1f, position = v(110, 110))
+var player = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, tex, intRect, space, 20, 20, mass = 0.1f, position = v(110, 110))
 player.body.torque = -2000.0f
 goSeq.add(player)
 
@@ -44,11 +46,12 @@ while window.open:
       window.close()
       break
     elif event.kind == csfml.EventType.MouseButtonReleased:
-      var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.circle, newTexture("p1.png"), space, width = 30, height = 30, mass = 0.1f, position = v(110, 110))
-      gameObject.body.position = v((float)mouse_getPosition(window).x, (float)mouse_getPosition(window).y)
-      gameObject.physicsShape.friction= 20
+      #var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.circle, newTexture("p1.png"), space, width = 30, height = 30, mass = 0.1f, position = v(110, 110))
+      #gameObject.body.position = v((float)mouse_getPosition(window).x, (float)mouse_getPosition(window).y)
+      #gameObject.physicsShape.friction= 20
       #gameObject.body.centerOfGravity = v(-15, -15)
-      goSeq.add(gameObject)
+      #goSeq.add(gameObject)
+      echo ""
   if (keyboard_isKeyPressed(KeyCode.W)):
     player.body.applyForceAtWorldPoint(v(0, -90), player.body.position)
   if (keyboard_isKeyPressed(KeyCode.S)):
@@ -60,8 +63,12 @@ while window.open:
   if (keyboard_isKeyPressed(KeyCode.F)):
     quit()
   window.clear(White)
+  var newIntRect = IntRect(left: 50, top: 50, width: 50, height: 200)
+  player.intRect = newIntRect
   for obj in goSeq:
     window.drawGameObject(obj)
+  #goSeq[0].intRect.left = goSeq[0].intRect.left + 1
+  #goSeq[0].intRect.top = goSeq[0].intRect.top + 1
   window.draw(rotation)
   #var newStr = ("x: ", cast[string](player.body.position.x), " y: ", cast[string](player.body.position.y))
   #echo player.body.position.x
