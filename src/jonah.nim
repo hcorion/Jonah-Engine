@@ -52,7 +52,7 @@ proc initGameObject*(spriteType: SpriteType, rigidbody: rbType, texture: Texture
       #circleData.setTexture(texture, toBoolInt(false))
       #circleData.origin = vec2(radius, radius)
     elif rigidbody == rbType.rectangle:
-      newGameObject.physicsShape = space.addShape(newBoxShape(newGameObject.body, width, height, 4))
+      newGameObject.physicsShape = space.addShape(newBoxShape(newGameObject.body, width, height, 0))
       var xy = Vector2f(x: width, y: height)
       var test = IntRect(left: 0, top: 0, width:300, height:400)
       #newGameObject.physicsShape.userData = csfml.newRectangleShape(xy)
@@ -92,7 +92,7 @@ proc drawGameObject*(win: RenderWindow, gameObject: GameObject){.discardable.} =
     let sprite = csfml.newSprite(gameObject.texture, gameObject.intRect)
     sprite.rotation = radToDeg(vtoangle(gameObject.body.rotation))
     sprite.origin = vec2(gameObject.intRect.height/2, gameObject.intRect.width/2)
-    #var vec = (gameObject.body.position.floor().x * 2, gameObject.body.position.floor().y * 2) 
+    #var vec = (gameObject.body.position.floor().x * 2, gameObject.body.position.floor().y * 2)
     sprite.position = gameObject.body.position.floor()
     sprite.scale = Vector2f(x: 0.1, y: 0.1)
     #win.draw(sprite)
