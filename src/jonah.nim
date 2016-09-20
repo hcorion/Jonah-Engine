@@ -51,14 +51,7 @@ proc initGameObject*(spriteType: SpriteType, rigidbody: rbType, texture: Texture
       var sprite = csfml.newSprite(texture, intRect)
       sprite.origin = vec2(intRect.height/2, intRect.width/2)
       var spriteScale: float = 1.0f
-      #if width.floor < intRect.width.toFloat:
       spriteScale = width.floor / intRect.width.toFloat
-      #elif width.floor > intRect.width.toFloat:
-      #  spriteScale = intRect.width.toFloat * width.floor
-      echo spriteScale
-
-
-
       sprite.scale = Vector2f(x: spriteScale, y: spriteScale)
       newGameObject.sprite = sprite
     else:

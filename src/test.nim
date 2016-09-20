@@ -15,9 +15,9 @@ space.iterations = 10
 type
   exampleSSIntRect = array[3, IntRect]
 let spriteSheetIntRects: exampleSSIntRect = [
-  IntRect(left: 161, top: 69, width: 28, height: 27), 
-  IntRect(left: 67, top: 68, width: 15, height: 15), 
-  IntRect(left: 83, top: 68, width: 15, height: 16)
+  IntRect(left: 161, top: 69, width: 28, height: 27),#The tree
+  IntRect(left: 67, top: 68, width: 15, height: 15),#the money
+  IntRect(left: 83, top: 67, width: 16, height: 16)#the bucket
   ]
 #type
 #  CompassDirections = enum
@@ -36,7 +36,7 @@ ground.friction = 20.0
 discard space.addShape(ground)
 var tex = newTexture("p1.png")
 var spriteSheet = newTexture("example-tileset.png")
-var intRect = IntRect(left: 0, top: 0, width: 389, height: 495)
+var intRect = IntRect(left: 0, top: 0, width: tex.size.x, height: tex.size.y)
 
 var player = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, tex, intRect, space, 20, 20, mass = 0.1f, position = v(110, 110))
 player.body.torque = -2000.0f
