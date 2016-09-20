@@ -56,8 +56,7 @@ while window.open:
       window.close()
       break
     elif event.kind == csfml.EventType.MouseButtonReleased:
-      var newIntRect = IntRect(left: 161, top: 69, width: 28, height: 27)
-      var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, spriteSheet, spriteSheetIntRects[random(spriteSheetIntRects.len)], space, 40, 30, mass = 0.1f, position = v(110, 110))
+      var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.circle, spriteSheet, spriteSheetIntRects[random(spriteSheetIntRects.len)], space, 40, 40, mass = 0.1f, position = v(110, 110))
       gameObject.body.position = v((float)mouse_getPosition(window).x, (float)mouse_getPosition(window).y)
       gameObject.physicsShape.friction= 20
       goSeq.add(gameObject)

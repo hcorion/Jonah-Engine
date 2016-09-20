@@ -41,23 +41,19 @@ proc initGameObject*(spriteType: SpriteType, rigidbody: rbType, texture: Texture
     if rigidbody == rbType.circle:
       let radius = height/2
       newGameObject.physicsShape = space.addShape(newCircleShape(newGameObject.body, radius, vzero))
-      newGameObject.physicsShape.userData = csfml.newCircleShape(radius)
-      #newGameObject.physicsShape.collisionType = cast[CollisionType](4)
-      #let circleData = cast[csfml.CircleShape](newGameObject.physicsShape.userData)
-      #circleData.setTexture(texture, toBoolInt(false))
-      #circleData.origin = vec2(radius, radius)
+      var sprite = csfml.newSprite(texture, intRect)
+      sprite.origin = vec2(intRect.height/2, intRect.width/2)
+      sprite.scale = Vector2f(x: width.floor / intRect.width.toFloat, y: height.floor / intRect.height.toFloat)
+      newGameObject.sprite = sprite
+
     elif rigidbody == rbType.rectangle:
       newGameObject.physicsShape = space.addShape(newBoxShape(newGameObject.body, width, height, 0))
       var sprite = csfml.newSprite(texture, intRect)
       sprite.origin = vec2(intRect.height/2, intRect.width/2)
-      var spriteScale: float = 1.0f
-      spriteScale = width.floor / intRect.width.toFloat
-      sprite.scale = Vector2f(x: spriteScale, y: spriteScale)
+      sprite.scale = Vector2f(x: width.floor / intRect.width.toFloat, y: height.floor / intRect.height.toFloat)
       newGameObject.sprite = sprite
     else:
       echo "Hmm, I can't create a physicsShape for that type of rbType."
-    #if sprite == SpriteType.circle:
-      #newGameObject.shape = space.addBody(newGameObject.body)
   result = newGameObject
 
 proc floor (vec: Vect): Vector2f =
@@ -66,14 +62,8 @@ proc floor (vec: Vect): Vector2f =
 
 proc drawGameObject*(win: RenderWindow, gameObject: GameObject){.discardable.} =
   if gameObject.spriteType == SpriteType.circle:
-    let circle = cast[csfml.CircleShape](gameObject.physicsShape.userData)
-    circle.position = gameObject.body.position.floor()
-    #circle.rotation = gameObject.body.rotation.x * 100
-    circle.rotation = radToDeg(vtoangle(gameObject.body.rotation))
-    win.draw(circle)
+    echo "Currently a SpriteType of circle is unsupported. Just use SpriteType.rectangle"
   elif gameObject.spriteType == SpriteType.rectangle:
-    #let rect = cast[csfml.Shape](gameObject.physicsShape.userData)
-    #let sprite = cast[csfml.Sprite](gameObject.physicsShape.userData)
     var sprite = gameObject.sprite
     sprite.rotation = radToDeg(vtoangle(gameObject.body.rotation))
     sprite.position = gameObject.body.position.floor()
