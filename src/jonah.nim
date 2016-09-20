@@ -5,8 +5,6 @@ import times, os
 {.experimental.}
 #TODO:
 #Add support for donuts (Used in momentForCircle)
-var maxVal*: float
-var minVal*: float
 type
   rbType* {.pure.} = enum
     none, rectangle, circle
@@ -16,10 +14,7 @@ type
     rectangle, circle
 
 type
-  GameObject* = tuple[spriteType: SpriteType, rigidbody: rbType, texture: Texture, intRect: IntRect, body: chipmunk.Body, shape: csfml.Shape, physicsShape: chipmunk.Shape]
-#    sprite: SpriteType
-#    rigidbody: rbType = rbType.none
-#    age: int
+  GameObject* = tuple[spriteType: SpriteType, rigidbody: rbType, texture: Texture, intRect: IntRect, body: chipmunk.Body, shape: csfml.Shape, physicsShape: chipmunk.Shape, sprite: csfml.Sprite]
 
 
 proc initGameObject*(spriteType: SpriteType, rigidbody: rbType, texture: Texture, intRect: IntRect, space: Space, width: float, height: float, mass: float, position: Vect): GameObject =
@@ -53,15 +48,19 @@ proc initGameObject*(spriteType: SpriteType, rigidbody: rbType, texture: Texture
       #circleData.origin = vec2(radius, radius)
     elif rigidbody == rbType.rectangle:
       newGameObject.physicsShape = space.addShape(newBoxShape(newGameObject.body, width, height, 0))
-      var xy = Vector2f(x: width, y: height)
-      var test = IntRect(left: 0, top: 0, width:300, height:400)
-      #newGameObject.physicsShape.userData = csfml.newRectangleShape(xy)
-      #newGameObject.physicsShape.userData = sprite
-      #let boxData = cast[csfml.Shape](newGameObject.physicsShape.userData)
-      #boxData.setTexture(texture, toBoolInt(false))
-      #boxData.origin = vec2(height/2, width/2)
-      #boxData.outlineColor = Red
-      #boxData.outlineThickness = 2.0
+      var sprite = csfml.newSprite(texture, intRect)
+      sprite.origin = vec2(intRect.height/2, intRect.width/2)
+      var spriteScale: float = 1.0f
+      #if width.floor < intRect.width.toFloat:
+      spriteScale = width.floor / intRect.width.toFloat
+      #elif width.floor > intRect.width.toFloat:
+      #  spriteScale = intRect.width.toFloat * width.floor
+      echo spriteScale
+
+
+
+      sprite.scale = Vector2f(x: spriteScale, y: spriteScale)
+      newGameObject.sprite = sprite
     else:
       echo "Hmm, I can't create a physicsShape for that type of rbType."
     #if sprite == SpriteType.circle:
@@ -82,18 +81,7 @@ proc drawGameObject*(win: RenderWindow, gameObject: GameObject){.discardable.} =
   elif gameObject.spriteType == SpriteType.rectangle:
     #let rect = cast[csfml.Shape](gameObject.physicsShape.userData)
     #let sprite = cast[csfml.Sprite](gameObject.physicsShape.userData)
-    if gameObject.body.rotation.x > maxVal:
-      maxVal = gameObject.body.rotation.x
-    elif gameObject.body.rotation.x < minVal:
-      minVal = gameObject.body.rotation.x
-    #rect.position = gameObject.body.position.floor()
-    #rect.rotation = radToDeg(vtoangle(gameObject.body.rotation))
-    #rect.rotation = 270
-    let sprite = csfml.newSprite(gameObject.texture, gameObject.intRect)
+    var sprite = gameObject.sprite
     sprite.rotation = radToDeg(vtoangle(gameObject.body.rotation))
-    sprite.origin = vec2(gameObject.intRect.height/2, gameObject.intRect.width/2)
-    #var vec = (gameObject.body.position.floor().x * 2, gameObject.body.position.floor().y * 2)
     sprite.position = gameObject.body.position.floor()
-    sprite.scale = Vector2f(x: 0.1, y: 0.1)
-    #win.draw(sprite)
     win.draw(sprite)

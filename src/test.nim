@@ -2,7 +2,7 @@ import jonah
 import chipmunk
 import csfml, csfml_graphics, csfml_system
 import strutils
-import math
+import math, random
 
 var
   gameHeight = 640.0
@@ -12,6 +12,16 @@ var space = newSpace()
 var gravity = v(0, 500f)
 space.gravity = gravity
 space.iterations = 10
+type
+  exampleSSIntRect = array[3, IntRect]
+let spriteSheetIntRects: exampleSSIntRect = [
+  IntRect(left: 161, top: 69, width: 28, height: 27), 
+  IntRect(left: 67, top: 68, width: 15, height: 15), 
+  IntRect(left: 83, top: 68, width: 15, height: 16)
+  ]
+#type
+#  CompassDirections = enum
+#    cdNorth, cdEast, cdSouth, cdWest
 
 var window = newRenderWindow(
   videoMode((cint)gameHeight, (cint)gameWidth), "TEST", WindowStyle.Default)
@@ -21,12 +31,12 @@ window.frameRateLimit = 60
 window.verticalSyncEnabled = true
 #var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, newTexture("p1.png"), space, width = 200, height = 200, mass = 0.1f, position = v(110, 110))
 
-var ground = newSegmentShape(space.staticBody, v(-160, gameHeight - 160), v(gameWidth + 160, gameHeight - 160), 0)
+var ground = newSegmentShape(space.staticBody, v(0, gameHeight - 160), v(gameWidth + 160, gameHeight - 160), 0)
 ground.friction = 20.0
 discard space.addShape(ground)
 var tex = newTexture("p1.png")
+var spriteSheet = newTexture("example-tileset.png")
 var intRect = IntRect(left: 0, top: 0, width: 389, height: 495)
-var sprite = newSprite(tex, intRect)
 
 var player = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, tex, intRect, space, 20, 20, mass = 0.1f, position = v(110, 110))
 player.body.torque = -2000.0f
@@ -46,12 +56,11 @@ while window.open:
       window.close()
       break
     elif event.kind == csfml.EventType.MouseButtonReleased:
-      #var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.circle, newTexture("p1.png"), space, width = 30, height = 30, mass = 0.1f, position = v(110, 110))
-      #gameObject.body.position = v((float)mouse_getPosition(window).x, (float)mouse_getPosition(window).y)
-      #gameObject.physicsShape.friction= 20
-      #gameObject.body.centerOfGravity = v(-15, -15)
-      #goSeq.add(gameObject)
-      echo ""
+      var newIntRect = IntRect(left: 161, top: 69, width: 28, height: 27)
+      var gameObject = jonah.initGameObject(SpriteType.rectangle, rbType.rectangle, spriteSheet, spriteSheetIntRects[random(spriteSheetIntRects.len)], space, 40, 30, mass = 0.1f, position = v(110, 110))
+      gameObject.body.position = v((float)mouse_getPosition(window).x, (float)mouse_getPosition(window).y)
+      gameObject.physicsShape.friction= 20
+      goSeq.add(gameObject)
   if (keyboard_isKeyPressed(KeyCode.W)):
     player.body.applyForceAtWorldPoint(v(0, -90), player.body.position)
   if (keyboard_isKeyPressed(KeyCode.S)):
@@ -63,8 +72,8 @@ while window.open:
   if (keyboard_isKeyPressed(KeyCode.F)):
     quit()
   window.clear(White)
-  var newIntRect = IntRect(left: 50, top: 50, width: 50, height: 200)
-  player.intRect = newIntRect
+  #var newIntRect = IntRect(left: 50, top: 50, width: 50, height: 200)
+  #player.intRect = newIntRect
   for obj in goSeq:
     window.drawGameObject(obj)
   #goSeq[0].intRect.left = goSeq[0].intRect.left + 1
@@ -76,6 +85,3 @@ while window.open:
   rotation.position = vec2(player.body.position.x - 40, player.body.position.y - 40)
   #window.drawGameObject(gameObject)
   window.display
-
-echo "max Value is: ", jonah.maxVal
-echo "min Value is : ", jonah.minVal
