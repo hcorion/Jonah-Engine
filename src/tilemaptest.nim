@@ -21,11 +21,12 @@ let spriteSheetIntRects: exampleSSIntRect = [
   ]
 let level =
     [
-        0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 0, 0, 0, 0,
-        1, 1, 0, 0, 0, 0, 0, 0, 3, 3, 3, 3, 3, 3, 3, 3,
-        0, 1, 0, 0, 2, 0, 3, 3, 3, 0, 1, 1, 1, 0, 0, 0,
-        0, 1, 1, 0, 3, 3, 3, 0, 0, 0, 1, 1, 1, 2, 0, 0,
+        0 , 1 , 2 , 3 , 4 , 5 , 6 , 7 , 8 , 9 , 10, 11,
+        12, 13, 14, 15,
+        16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+        32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
+        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63,
+        64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 1, 1, 1, 2, 0, 0,
         0, 0, 1, 0, 3, 0, 2, 2, 0, 0, 1, 1, 1, 1, 2, 0,
         2, 0, 1, 0, 3, 0, 2, 2, 2, 0, 1, 1, 1, 1, 1, 1,
         0, 0, 1, 0, 3, 2, 2, 2, 0, 0, 0, 0, 1, 1, 1, 1
@@ -36,68 +37,32 @@ let level =
 ##
 var m_vertices*: VertexArray
 var spriteSheet = newTexture("example-tileset.png")
-proc createTileMap[I](width, height: int, level: array[I, int], tileSize: Vect): bool =
-  #m_vertices = newVertexArray()
-  #m_vertices.primitiveType = PrimitiveType.Quads
+proc createTileMap[I](width, height: int, level: array[I, int], tileSize: Vect, scale: float = 1.0f, blankNumber: int = 0, usePhysics: bool = false): bool =
   m_vertices = newVertexArray(PrimitiveType.Quads)
-  m_vertices.append vertex(vec2(0, 0), Green)
-  m_vertices.append vertex(vec2(100, 0), Red)
-  m_vertices.append vertex(vec2(100, 100), Blue)
-  m_vertices.append vertex(vec2(0, 100), Blue)
-  m_vertices.resize(9)
-  #m_vertices.append vertex(vec2(100, 100), Transparent, Vector2f(x: 100, y: 0))
-  #m_vertices.append vertex(vec2(200, 100), Transparent, Vector2f(x: 200, y: 0))
-  #m_vertices.append vertex(vec2(200, 200), Transparent, Vector2f(x: 0, y: 0))
-  #m_vertices.append vertex(vec2(100, 200), Transparent, Vector2f(x: 200, y: 200))
-  m_vertices.getVertex(4).position = vec2(100, 100)
-  m_vertices.getVertex(5).position = vec2(200, 100)
-  m_vertices.getVertex(6).position = vec2(200, 200)
-  m_vertices.getVertex(7).position = vec2(100, 200)
-  m_vertices.getVertex(8).position = vec2(100, 100)
-  m_vertices.getVertex(4).color = White
-  m_vertices.getVertex(5).color = White
-  m_vertices.getVertex(6).color = White
-  m_vertices.getVertex(7).color = Blue
-  m_vertices.getVertex(8).color = Blue
-#389 x 495
-  m_vertices.getVertex(0).texCoords = Vector2f(x: 0, y: 0)
-  m_vertices.getVertex(1).texCoords = Vector2f(x: 389, y: 0)
-  m_vertices.getVertex(2).texCoords = Vector2f(x: 389, y: 495)
-  m_vertices.getVertex(3).texCoords = Vector2f(x: 0, y: 495)
-  m_vertices.getVertex(4).texCoords = Vector2f(x: 0, y: 0)
-  
-  
-  for i in 0..width:
-    for j in 0..height:
-      echo ""
+  for i in countup(0, width-1):
+    for j in countup(0, height-1):
       var tileNumber: int = level[i + j * width]
-      var tu = (tileNumber.toFloat) mod (spriteSheet.size.x.toFloat / tileSize.x)
-      var tv = tileNumber.toFloat / (spriteSheet.size.x.toFloat / tileSize.x)
-      #var quad: VertexArray = m_vertices[(i + j * width) * 4]
-      var test = i + j * width
-      #m_vertices.getVertex(test).position = Vector2f(x: i.toFloat * tileSize.x, y: j.toFloat * tileSize.y)
-      #m_vertices.getVertex(test+1).position = Vector2f(x: (i + 1).toFloat * tileSize.x,y: j.toFloat * tileSize.y)
-      #m_vertices.getVertex(test+2).position = Vector2f(x:(i + 1).toFloat * tileSize.x, y: (j + 1).toFloat * tileSize.y)
-      #m_vertices.getVertex(test+3).position = Vector2f(x: i.toFloat * tileSize.x, y: (j + 1).toFloat * tileSize.y)
-      
-      #m_vertices.getVertex(test).texCoords = Vector2f(x: tu * tileSize.x, y: tv * tileSize.y);
-      #m_vertices.getVertex(test+1).texCoords = Vector2f(x: (tu + 1) * tileSize.x, y: tv * tileSize.y);
-      #m_vertices.getVertex(test+2).texCoords = Vector2f(x: (tu + 1) * tileSize.x, y:  (tv + 1) * tileSize.y);
-      #m_vertices.getVertex(test+3).texCoords = Vector2f(x: tu * tileSize.x, y: (tv + 1) * tileSize.y);
-      #echo m_vertices.vertexCount
-      #echo m_vertices.getVertex(17).position
-      ##echo i + j * width * 4
-      #discard renderStates()
+      var tu: int = (tileNumber) mod (spriteSheet.size.x / tileSize.x.toInt).toInt
+      var tv: int = (int)tileNumber / ((int)spriteSheet.size.x / (int)tileSize.x.toInt)
+      m_vertices.append vertex(vec2(i.toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), White, vec2(tu * tileSize.x.toInt, tv * tileSize.y.toInt))
+      m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, tv * tileSize.y.toInt))
+      m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
+      m_vertices.append vertex(vec2(i.toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2(tu * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
+  echo m_vertices[0].texCoords
+  echo m_vertices[1].texCoords
+  echo m_vertices[2].texCoords
+  echo m_vertices[3].texCoords
+
   return true
 
 
 
-var test: Vect = Vect(x:50, y: 50)
-discard createTileMap(2, 2, level, test)
-proc drawVertexArray(window: RenderWindow)=
-  var testt: RenderStates
-  testt.texture = spriteSheet
-  window.draw(m_vertices, testt)
+var test: Vect = Vect(x:16, y: 16)
+#discard createTileMap(11, 7, level, test, 2.0f, 16)
+var max = sqrt(level.len.toFloat).toInt - 1
+echo max
+echo level.len
+discard createTileMap(12, 6, level, test, 3.0f, 16)
   
 
 
@@ -159,16 +124,14 @@ while window.open:
   window.clear(White)
   #var newIntRect = IntRect(left: 50, top: 50, width: 50, height: 200)
   #player.intRect = newIntRect
-  window.draw(m_vertices)
+  window.draw(rotation)
+  var rend = renderStates()
+  rend.texture = spriteSheet
+  window.draw(m_vertices, rend)
   for obj in goSeq:
     window.drawGameObject(obj)
   #goSeq[0].intRect.left = goSeq[0].intRect.left + 1
   #goSeq[0].intRect.top = goSeq[0].intRect.top + 1
-  window.draw(rotation)
-  var rend = RenderStates()
-  rend.texture = tex
-  window.drawVertexArray(m_vertices, rend)
-  window.draw(m_vertices, rend)
   #window.drawVertexArray()
   #var newStr = ("x: ", cast[string](player.body.position.x), " y: ", cast[string](player.body.position.y))
   #echo player.body.position.x
