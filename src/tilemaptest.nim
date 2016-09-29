@@ -40,25 +40,83 @@ var spriteSheet = newTexture("example-tileset.png")
 proc createTileMap[I](width, height: int, level: array[I, int], tileSize: Vect, scale: float = 1.0f, blankNumber: int = 0, usePhysics: bool = false): bool =
   m_vertices = newVertexArray(PrimitiveType.Quads)
   var count: int = 0
+  var drawHeight: int = 0
+  var drawWidth: int = 0
+  var spriteHeight: int = 0
+  for i in 0..width*height:
+    if width*height > level.len:
+      echo "ERROR: Declaring a size that is larger than the level array length!"
+      break
+    if drawWidth >= width:
+      drawHeight += 1
+      drawWidth = 0
+      spriteHeight += 1
+      echo "yeah"
+    #if spriteSheet.size.y < drawHeight:
+    # spriteHeight += 1
+    #elif spriteHeight > spriteSheet.size.y:
+    #  spriteHeight = 0
+    var xTileSize = tileSize.x * scale
+    var yTileSize = tileSize.y * scale
+    var spriteWidth = level[i]
+    var spritePosX: int = 0
+    var spritePosY: int = 0
+    var texting: int = 0 
+    echo texting
+    if (level[i].toFloat * tileSize.x).toInt >= (int)spriteSheet.size.y.toFloat:
+      spritePosX = ((int)level[i].toFloat * tileSize.x) - spriteSheet.size.y * texting
+      texting = ((level[i].toFloat * tileSize.x) / spriteSheet.size.y.toFloat).floor.toInt
+    else:
+      echo "yas!"
+      spritePosX = ((int)level[i].toFloat * tileSize.x)
+      texting = 1
+    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize),                             White, vec2(spritePosX.toFloat, texting.toFloat * tileSize.y))
+    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize),               White, vec2(spritePosX.toFloat + tileSize.x, texting.toFloat * tileSize.y))
+    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize + (yTileSize)), White, vec2(spritePosX.toFloat + tileSize.x, texting.toFloat * tileSize.y + tileSize.y))
+    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize + (yTileSize)),               White, vec2(spritePosX.toFloat, texting.toFloat * tileSize.y + tileSize.y))
+    echo m_vertices[i].position
+    #m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, tv * tileSize.y.toInt))
+    #m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
+    #m_vertices.append vertex(vec2(i.toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2(tu * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
+    drawWidth += 1
+
   for i in countup(0, width-1):
+    if true:
+      break
     for j in countup(0, height-1):
-      var tileNumber: int = level[i + j * width]
-      var tu: int = (tileNumber) mod (spriteSheet.size.x / tileSize.x.toInt).toInt
-      var tv: int = (int)tileNumber / ((int)spriteSheet.size.x / (int)tileSize.x.toInt)
-      m_vertices.append vertex(vec2(i.toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), White, vec2(tu * tileSize.x.toInt, tv * tileSize.y.toInt))
-      m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, tv * tileSize.y.toInt))
-      m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
-      m_vertices.append vertex(vec2(i.toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2(tu * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
-      echo m_vertices[count].position.x
+      
+      #NOTE! Algorithm renders them from top to bottom
+      #var tileNumber: int = level[i + j * width]
+      #var tu: int = (tileNumber) mod (spriteSheet.size.x / tileSize.x.toInt).toInt
+      #var tv: int = (int)tileNumber / ((int)spriteSheet.size.x / (int)tileSize.x.toInt)
+      var newColor = White
+      if count == 0:
+        newColor = Red
+      elif count == 1:
+        newColor = Green
+      elif count == 2:
+        newColor = Blue
+      elif count == 3:
+        newColor = Black
+      elif count == 4:
+        newColor = Magenta
+      else:
+        newColor = Yellow
+      #m_vertices.append vertex(vec2(i.toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), newColor, vec2(tu * tileSize.x.toInt, tv * tileSize.y.toInt))
+      #m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), newColor, vec2((tu + 1) * tileSize.x.toInt, tv * tileSize.y.toInt))
+      #m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
+      #m_vertices.append vertex(vec2(i.toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2(tu * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
+      echo "######"
+      echo m_vertices[count].position
+      echo m_vertices[count+1].position
+      echo m_vertices[count+2].position
+      echo m_vertices[count+3].position
+      echo count
       echo m_vertices[count].texCoords
       echo m_vertices[count+1].texCoords
       echo m_vertices[count+2].texCoords
       echo m_vertices[count+3].texCoords
       #echo level[count]
-      if count == i+j:
-        echo "yes"
-      else:
-        echo "no"
       if level[count] == blankNumber:
         echo m_vertices[count+1].position.x
         for d in 0..3:
@@ -76,10 +134,10 @@ proc createTileMap[I](width, height: int, level: array[I, int], tileSize: Vect, 
 
 var test: Vect = Vect(x:16, y: 16)
 #discard createTileMap(11, 7, level, test, 2.0f, 16)
-var max = sqrt(level.len.toFloat).toInt - 1
-echo max
-echo level.len
-discard createTileMap(12, 6, level, test, 3.0f, 22)
+var max = sqrt(level.len.toFloat).toInt
+#echo max
+#echo level.len
+discard createTileMap(max, max, level, test, 3.0f, 22)
 
 
 
