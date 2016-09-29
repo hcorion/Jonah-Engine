@@ -39,6 +39,7 @@ var m_vertices*: VertexArray
 var spriteSheet = newTexture("example-tileset.png")
 proc createTileMap[I](width, height: int, level: array[I, int], tileSize: Vect, scale: float = 1.0f, blankNumber: int = 0, usePhysics: bool = false): bool =
   m_vertices = newVertexArray(PrimitiveType.Quads)
+  var count: int = 0
   for i in countup(0, width-1):
     for j in countup(0, height-1):
       var tileNumber: int = level[i + j * width]
@@ -48,10 +49,26 @@ proc createTileMap[I](width, height: int, level: array[I, int], tileSize: Vect, 
       m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, tv * tileSize.y.toInt))
       m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
       m_vertices.append vertex(vec2(i.toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2(tu * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
-  echo m_vertices[0].texCoords
-  echo m_vertices[1].texCoords
-  echo m_vertices[2].texCoords
-  echo m_vertices[3].texCoords
+      echo m_vertices[count].position.x
+      echo m_vertices[count].texCoords
+      echo m_vertices[count+1].texCoords
+      echo m_vertices[count+2].texCoords
+      echo m_vertices[count+3].texCoords
+      #echo level[count]
+      if count == i+j:
+        echo "yes"
+      else:
+        echo "no"
+      if level[count] == blankNumber:
+        echo m_vertices[count+1].position.x
+        for d in 0..3:
+          echo d
+          var ground = newSegmentShape(space.staticBody, v(m_vertices[count-1+d].position.x, m_vertices[count-1+d].position.y), v(m_vertices[count+d].position.x, m_vertices[count+d].position.y), 0)
+          ground.friction = 20.0
+          discard space.addShape(ground)
+      count += 1
+
+
 
   return true
 
@@ -62,8 +79,8 @@ var test: Vect = Vect(x:16, y: 16)
 var max = sqrt(level.len.toFloat).toInt - 1
 echo max
 echo level.len
-discard createTileMap(12, 6, level, test, 3.0f, 16)
-  
+discard createTileMap(12, 6, level, test, 3.0f, 22)
+
 
 
 
