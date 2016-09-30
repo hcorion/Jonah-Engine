@@ -62,18 +62,26 @@ proc createTileMap[I](width, height: int, level: array[I, int], tileSize: Vect, 
     var spritePosX: int = 0
     var spritePosY: int = 0
     var texting: int = 0 
-    echo texting
-    if (level[i].toFloat * tileSize.x).toInt >= (int)spriteSheet.size.y.toFloat:
-      spritePosX = ((int)level[i].toFloat * tileSize.x) - spriteSheet.size.y * texting
-      texting = ((level[i].toFloat * tileSize.x) / spriteSheet.size.y.toFloat).floor.toInt
-    else:
-      echo "yas!"
-      spritePosX = ((int)level[i].toFloat * tileSize.x)
-      texting = 1
-    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize),                             White, vec2(spritePosX.toFloat, texting.toFloat * tileSize.y))
-    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize),               White, vec2(spritePosX.toFloat + tileSize.x, texting.toFloat * tileSize.y))
-    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize + (yTileSize)), White, vec2(spritePosX.toFloat + tileSize.x, texting.toFloat * tileSize.y + tileSize.y))
-    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize + (yTileSize)),               White, vec2(spritePosX.toFloat, texting.toFloat * tileSize.y + tileSize.y))
+    texting = ((level[i].toFloat * tileSize.x) / spriteSheet.size.x.toFloat).floor.toInt
+    var spriteWidthCurrent: float
+    #if (level[i].toFloat * tileSize.x).toInt >= (int)spriteSheet.size.y.toFloat:
+      
+    spritePosX = ((int)level[i].toFloat * tileSize.x) - spriteSheet.size.x * texting
+      
+      
+    #else:
+    #  echo "yas!"
+    #  spritePosX = ((int)level[i].toFloat * tileSize.x)
+      #spriteWidthCurrent = 
+      #texting = 1
+    spriteWidthCurrent = (texting).toFloat * tileSize.y
+    echo "texting variable is: ", texting
+    echo "level id: ", (level[i].toFloat * tileSize.x).toInt
+    echo "spriteWidthCurrent: ", spriteWidthCurrent
+    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize),                             White, vec2(spritePosX.toFloat, spriteWidthCurrent))
+    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize),               White, vec2(spritePosX.toFloat + tileSize.x, spriteWidthCurrent))
+    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize + (yTileSize)), White, vec2(spritePosX.toFloat + tileSize.x, spriteWidthCurrent + tileSize.y))
+    m_vertices.append vertex(vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize + (yTileSize)),               White, vec2(spritePosX.toFloat, spriteWidthCurrent + tileSize.y))
     echo m_vertices[i].position
     #m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, j.toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, tv * tileSize.y.toInt))
     #m_vertices.append vertex(vec2((i + 1).toFloat * tileSize.x * scale, (j + 1).toFloat * tileSize.y * scale), White, vec2((tu + 1) * tileSize.x.toInt, (tv + 1) * tileSize.y.toInt))
@@ -137,7 +145,7 @@ var test: Vect = Vect(x:16, y: 16)
 var max = sqrt(level.len.toFloat).toInt
 #echo max
 #echo level.len
-discard createTileMap(max, max, level, test, 3.0f, 22)
+discard createTileMap(12, 7, level, test, 3.0f, 22)
 
 
 
