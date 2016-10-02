@@ -15,6 +15,7 @@ type
 
 type
   GameObject* = tuple[spriteType: SpriteType, rigidbody: rbType, texture: Texture, intRect: IntRect, body: chipmunk.Body, shape: csfml.Shape, physicsShape: chipmunk.Shape, sprite: csfml.Sprite]
+  TileMap* = tuple[vertexArray: VertexArray, spriteSheet: Texture]
 
 
 proc initGameObject*(spriteType: SpriteType, rigidbody: rbType, texture: Texture, intRect: IntRect, space: Space, width: float, height: float, mass: float, position: Vect): GameObject =
@@ -68,3 +69,91 @@ proc drawGameObject*(win: RenderWindow, gameObject: GameObject){.discardable.} =
     sprite.rotation = radToDeg(vtoangle(gameObject.body.rotation))
     sprite.position = gameObject.body.position.floor()
     win.draw(sprite)
+
+
+proc createTileMap*[I](width, height: int, level: array[I, int], tileSize: Vect, spriteSheet: Texture, scale: float = 1.0f, blankNumber: int = 0, usePhysics: bool = false, space: Space = nil): TileMap =
+  #Some basic error checking.
+  if width*height > level.len:
+      echo "ERROR: Declaring a size that is larger than the level array length!"
+      return
+  #Declaring the Vertex array and specifying it's type
+  var 
+    vertexArray = newVertexArray(PrimitiveType.Quads)
+    drawHeight: int = 0
+    drawWidth: int = 0
+    physicsCount: int = 0
+    previousLine = newSeq[int](width)
+    physicsObjects = newSeq[SegmentShape](0)
+  let
+    xTileSize = tileSize.x * scale
+    yTileSize = tileSize.y * scale
+  for i in 0..width*height-1:
+    if drawWidth >= width:
+      drawHeight += 1
+      drawWidth = 0
+      for p in 0..width-1:
+        previousLine[p] = level[((width*drawHeight)+p)-width]
+      echo previousLine
+
+    let layer: int = ((level[i].toFloat * tileSize.x) / spriteSheet.size.x.toFloat).floor.toInt
+      
+    var spritePosX = (level[i].toFloat * tileSize.x) - spriteSheet.size.x.toFloat * layer.toFloat
+    
+    var spriteWidthCurrent: float = layer.toFloat * tileSize.y
+    
+    vertexArray.append vertex(
+      vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize), White, 
+      vec2(spritePosX, spriteWidthCurrent))
+    
+    vertexArray.append vertex(
+      vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize), White, 
+      vec2(spritePosX + tileSize.x, spriteWidthCurrent))
+    
+    vertexArray.append vertex(
+      vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize + (yTileSize)), White, 
+      vec2(spritePosX + tileSize.x, spriteWidthCurrent + tileSize.y))
+    
+    vertexArray.append vertex(
+      vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize + (yTileSize)), White, 
+      vec2(spritePosX, spriteWidthCurrent + tileSize.y))
+    if usePhysics:
+      if level[i] == blankNumber:
+        if drawHeight > 0:
+        #If we're an open space and we have a closed space above us, seal it off.
+          if previousLine[drawWidth] != blankNumber:
+            physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount].position.x, vertexArray[physicsCount].position.y), v(vertexArray[physicsCount+1].position.x, vertexArray[physicsCount+1].position.y), 0)
+          #If we're an open space and there is a closed space to our left or right, seal it off.
+          if drawWidth != 0:
+            if level[i-1] != blankNumber:
+              physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount+3].position.x, vertexArray[physicsCount+3].position.y), v(vertexArray[physicsCount].position.x, vertexArray[physicsCount].position.y), 0)
+          if drawWidth < width-1:
+            if level[i+1] != blankNumber:
+              physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount+1].position.x, vertexArray[physicsCount+1].position.y), v(vertexArray[physicsCount+2].position.x, vertexArray[physicsCount+2].position.y), 0)
+      else:
+        if drawHeight == 0:
+          physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount].position.x, vertexArray[physicsCount].position.y), v(vertexArray[physicsCount+1].position.x, vertexArray[physicsCount+1].position.y), 0)
+          if level[i-1] == blankNumber:
+            physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount+3].position.x, vertexArray[physicsCount+3].position.y), v(vertexArray[physicsCount].position.x, vertexArray[physicsCount].position.y), 0)
+          if level[i+1] == blankNumber:
+            physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount+1].position.x, vertexArray[physicsCount+1].position.y), v(vertexArray[physicsCount+2].position.x, vertexArray[physicsCount+2].position.y), 0)
+        else:
+          #If we're a solid block and there is an open block above us, seal us off.
+          if previousLine[drawWidth] == blankNumber:
+            physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount].position.x, vertexArray[physicsCount].position.y), v(vertexArray[physicsCount+1].position.x, vertexArray[physicsCount+1].position.y), 0)
+    physicsCount += 4
+    drawWidth += 1
+  if usePhysics:
+    if space == nil:
+      echo "ERROR: You've declared a physics TileMap without a Chipmunk2D space!"
+    for i in 0..physicsObjects.len-1:
+      physicsObjects[i].friction = 20.0f
+      discard space.addShape(physicsObjects[i])
+  var finalTileMap: TileMap
+  finalTileMap.vertexArray = vertexArray
+  finalTileMap.spriteSheet = spriteSheet
+  return finalTileMap
+
+proc draw*(win: RenderWindow, tileMap: TileMap){.discardable.} =
+  var rend = renderStates()
+  rend.texture = tileMap.spriteSheet
+  win.draw(tileMap.vertexArray, rend)

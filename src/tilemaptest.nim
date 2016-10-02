@@ -11,15 +11,15 @@ var
 var space = newSpace()
 var gravity = v(0, 500f)
 space.gravity = gravity
-space.iterations = 10
+space.iterations = 200
 type
   exampleSSIntRect = array[3, IntRect]
 let spriteSheetIntRects: exampleSSIntRect = [
-  IntRect(left: 161, top: 69, width: 28, height: 27),#The tree
-  IntRect(left: 67, top: 68, width: 15, height: 15),#the money
-  IntRect(left: 83, top: 67, width: 16, height: 16)#the bucket
+  IntRect(left: 160, top: 66, width: 32, height: 30),#The tree
+  IntRect(left: 65, top: 65, width: 15, height: 15),#the money
+  IntRect(left: 81, top: 64, width: 15, height: 16)#the bucket
   ]
-let level =
+const level =
     [
         16, 30, 31, 31, 32, 16, 16, 30, 31, 31,
         16, 16, 16, 16, 16, 16, 16, 16, 16, 46,
@@ -32,108 +32,15 @@ let level =
         16, 16, 16, 16, 16, 16, 16, 16, 16, 16,
         0 , 1 , 1 , 1 , 2 , 16, 6 , 7 , 7 , 7 ,
     ]
-
-##
-#Tilemap section
-##
-var m_vertices*: VertexArray
 var spriteSheet = newTexture("example-tileset.png")
-proc createTileMap[I](width, height: int, level: array[I, int], tileSize: Vect, scale: float = 1.0f, blankNumber: int = 0, usePhysics: bool = false): bool =
-  #Some basic error checking.
-  if width*height > level.len:
-      echo "ERROR: Declaring a size that is larger than the level array length!"
-      return
-  #Declaring the Vertex array and specifying it's type
-  m_vertices = newVertexArray(PrimitiveType.Quads)
-  var 
-    drawHeight: int = 0
-    drawWidth: int = 0
-    physicsCount: int = 0
-    previousLine = newSeq[int](width)
-  let
-    xTileSize = tileSize.x * scale
-    yTileSize = tileSize.y * scale
-  for i in 0..width*height-1:
-    if drawWidth >= width:
-      drawHeight += 1
-      drawWidth = 0
-      for p in 0..width-1:
-        previousLine[p] = level[(width*drawHeight)+p]
-      echo previousLine
-
-    let layer: int = ((level[i].toFloat * tileSize.x) / spriteSheet.size.x.toFloat).floor.toInt
-      
-    var spritePosX = (level[i].toFloat * tileSize.x) - spriteSheet.size.x.toFloat * layer.toFloat
-    
-    var spriteWidthCurrent: float = layer.toFloat * tileSize.y
-    
-    m_vertices.append vertex(
-      vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize), White, 
-      vec2(spritePosX, spriteWidthCurrent))
-    
-    m_vertices.append vertex(
-      vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize), White, 
-      vec2(spritePosX + tileSize.x, spriteWidthCurrent))
-    
-    m_vertices.append vertex(
-      vec2(drawWidth.toFloat * xTileSize + (xTileSize), drawHeight.toFloat * yTileSize + (yTileSize)), White, 
-      vec2(spritePosX + tileSize.x, spriteWidthCurrent + tileSize.y))
-    
-    m_vertices.append vertex(
-      vec2(drawWidth.toFloat * xTileSize, drawHeight.toFloat * yTileSize + (yTileSize)), White, 
-      vec2(spritePosX, spriteWidthCurrent + tileSize.y))
-    drawWidth += 1
-    if level[i] == blankNumber:
-      #echo "test"
-      
-      for d in 0..2:
-        #echo m_vertices[physicsCount+d].position.x
-        #echo "physicsCount + d is: ", physicsCount+d
-        #echo d
-        var ground = newSegmentShape(space.staticBody, v(m_vertices[physicsCount+d].position.x, m_vertices[physicsCount+d].position.y), v(m_vertices[physicsCount+d+1].position.x, m_vertices[physicsCount+d+1].position.y), 0)
-        ground.friction = 20.0
-        #discard space.addShape(ground)
-      var ground = newSegmentShape(space.staticBody, v(m_vertices[physicsCount].position.x, m_vertices[physicsCount].position.y), v(m_vertices[physicsCount+3].position.x, m_vertices[physicsCount+3].position.y), 0)
-      ground.friction = 20.0
-      #discard space.addShape(ground)
-      #count += 1
-    else:
-      if drawHeight == 0:
-        var ground = newSegmentShape(space.staticBody, v(m_vertices[physicsCount].position.x, m_vertices[physicsCount].position.y), v(m_vertices[physicsCount+1].position.x, m_vertices[physicsCount+1].position.y), 0)
-        ground.friction = 20.0
-        discard space.addShape(ground)
-      else:
-        var test: int
-        #if level[drawWidt ==2
-        #echo ""
-    physicsCount += 4
-    #NEW PHYSICS ALGORITHM
-    
-
-
-
-
-  return true
 
 
 
 var test: Vect = Vect(x:16, y: 16)
-#discard createTileMap(11, 7, level, test, 2.0f, 16)
 var max = sqrt(level.len.toFloat).toInt
-#echo max
-#echo level.len
-discard createTileMap(10, 10, level, test, 3.0f, 16)
 
+var tileMap = createTileMap(10, 10, level, test, spriteSheet, 3.0f, 16, true, space)
 
-
-
-
-
-
-
-##
-
-##
 var window = newRenderWindow(
   videoMode((cint)gameHeight, (cint)gameWidth), "TEST", WindowStyle.Default)
 #gameObject = (SpriteType.rectangle, rbType.none)
@@ -184,10 +91,8 @@ while window.open:
   window.clear(White)
   #var newIntRect = IntRect(left: 50, top: 50, width: 50, height: 200)
   #player.intRect = newIntRect
+  window.draw(tileMap)
   window.draw(rotation)
-  var rend = renderStates()
-  rend.texture = spriteSheet
-  window.draw(m_vertices, rend)
   for obj in goSeq:
     window.drawGameObject(obj)
   #goSeq[0].intRect.left = goSeq[0].intRect.left + 1
