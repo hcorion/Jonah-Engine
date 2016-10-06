@@ -20,7 +20,7 @@ let spriteSheetIntRects: exampleSSIntRect = [
   IntRect(left: 81, top: 64, width: 15, height: 16)#the bucket
   ]
 const level =
-    [
+    @[
         16, 30, 31, 31, 32, 16, 16, 30, 31, 31,
         16, 16, 16, 16, 16, 16, 16, 16, 16, 46,
         16, 16, 16, 16, 16, 16, 16, 16, 16, 46,

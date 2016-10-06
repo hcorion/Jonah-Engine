@@ -34,7 +34,7 @@ proc initGameObject*(spriteType: SpriteType, rigidbody: rbType, texture: Texture
     elif rigidbody == rbType.rectangle:
       moment = momentForBox(mass, width, height)
     else:
-      echo "I can't create a moment for that type of rbType"
+      echo "I can't create a moment of inertia for that type of rbType"
     #Creating the body
     newGameObject.body = space.addBody(newBody(mass, moment))
     newGameObject.body.position = position
@@ -71,7 +71,7 @@ proc drawGameObject*(win: RenderWindow, gameObject: GameObject){.discardable.} =
     win.draw(sprite)
 
 
-proc createTileMap*[I](width, height: int, level: array[I, int], tileSize: Vect, spriteSheet: Texture, scale: float = 1.0f, blankNumber: int = 0, usePhysics: bool = false, space: Space = nil): TileMap =
+proc createTileMap*(width, height: int, level: seq[int], tileSize: Vect, spriteSheet: Texture, scale: float = 1.0f, blankNumber: int = 0, usePhysics: bool = false, space: Space = nil): TileMap =
   #Some basic error checking.
   if width*height > level.len:
       echo "ERROR: Declaring a size that is larger than the level array length!"
@@ -132,8 +132,9 @@ proc createTileMap*[I](width, height: int, level: array[I, int], tileSize: Vect,
       else:
         if drawHeight == 0:
           physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount].position.x, vertexArray[physicsCount].position.y), v(vertexArray[physicsCount+1].position.x, vertexArray[physicsCount+1].position.y), 0)
-          if level[i-1] == blankNumber:
-            physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount+3].position.x, vertexArray[physicsCount+3].position.y), v(vertexArray[physicsCount].position.x, vertexArray[physicsCount].position.y), 0)
+          if i != 0:
+            if level[i-1] == blankNumber:
+              physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount+3].position.x, vertexArray[physicsCount+3].position.y), v(vertexArray[physicsCount].position.x, vertexArray[physicsCount].position.y), 0)
           if level[i+1] == blankNumber:
             physicsObjects.add newSegmentShape(space.staticBody, v(vertexArray[physicsCount+1].position.x, vertexArray[physicsCount+1].position.y), v(vertexArray[physicsCount+2].position.x, vertexArray[physicsCount+2].position.y), 0)
         else:
